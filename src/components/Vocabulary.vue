@@ -3,7 +3,11 @@
 		<h1>{{ msg }}</h1>
 
 		<ul class="words-list">
-			<li v-for="word in randomWords">{{ word }}</li>
+			<li v-for="word in randomWords">
+				{{ splitWord(word) }} - 
+				{{ shuffleWord(splitWord(word)) }}<br>
+				<span class="hint">{{ splitHint(word) }}</span>
+			</li>
 		</ul>
 
 	</div>
@@ -17,38 +21,65 @@
 				msg: 'Vocabulary page',
 				words: [],
 				randomWords: [],
-				defaultMax: 20
+				defaultMax: 20,
+				users: []
 			}
 		},
 		methods: {
-			shuffleWords( input ) {
+			getRandomWords( input ) {
 
-				// https://www.kirupa.com/html5/shuffling_array_js.htm
-				for (let i = input.length-1; i >=0; i--) {
+				input = this.swapArrs(input)
 
-	        let randomIndex = Math.floor(Math.random()*(i+1)); 
-	        let itemAtIndex = input[randomIndex]; 
-	         
-	        input[randomIndex] = input[i]; 
-	        input[i] = itemAtIndex;
-
-		    }
-
-		    let newInput = [];
+		    let newInput = []
 
 		    for (let i = 0; i < this.defaultMax; i++) {
 
-		    	newInput[i] = input[i];
+		    	newInput[i] = input[i]
 
 		    }
 
-		    return newInput;
+		    return newInput
+
+			},
+			shuffleWord( word ) {
+
+				let strSplit = word.split('')
+				let shuffle = this.swapArrs(strSplit)
+
+				return shuffle.join('')
+
+			},
+			swapArrs( arr ) {
+
+				// https://www.kirupa.com/html5/shuffling_array_js.htm
+				for (let i = arr.length-1; i >=0; i--) {
+
+	        let randomIndex = Math.floor(Math.random()*(i+1)); 
+	        let itemAtIndex = arr[randomIndex]; 
+	         
+	        arr[randomIndex] = arr[i]; 
+	        arr[i] = itemAtIndex;
+
+		    }
+
+		    return arr
+
+			},
+			splitWord(phrase) {
+
+				return phrase.split('|')[0]
+
+			},
+			splitHint(phrase) {
+
+				return phrase.split('|')[1]
+
 			}
 		},
 		created() {
 
 			this.words = this.$words
-			this.randomWords = this.shuffleWords(this.words)
+			this.randomWords = this.getRandomWords(this.words)
 
 		}
 	}

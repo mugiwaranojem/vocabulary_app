@@ -4,8 +4,12 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import words from './words'
+import vueResource from 'vue-resource'
+import VueJsonp from 'vue-jsonp'
 
 Vue.config.productionTip = false
+Vue.use(vueResource)
+Vue.use(VueJsonp)
 
 /* eslint-disable no-new */
 new Vue({
