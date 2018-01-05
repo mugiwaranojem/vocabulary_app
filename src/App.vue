@@ -1,12 +1,27 @@
 <template>
   <div id="app">
+    <Timer/>
     <router-view/>
+
+    {{ checkTime() }}
   </div>
 </template>
 
 <script>
+import Vocabulary from '@/components/Vocabulary' 
+import Timer from './components/Timer' 
+
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    Vocabulary,
+    Timer
+  },
+  methods: {
+      checkTime() {
+        let myTimer =  Timer.data()
+      }
+  }
 }
 </script>
 
