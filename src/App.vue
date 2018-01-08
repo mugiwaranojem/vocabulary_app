@@ -1,8 +1,7 @@
 <template>
   <div id="app">
     <Timer/>
-    <router-view/>
-
+    <Vocabulary/>
     {{ checkTime() }}
   </div>
 </template>

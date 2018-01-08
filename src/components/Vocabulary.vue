@@ -1,14 +1,16 @@
 <template>
 	<div class="vocabulary">
-		<h1>{{ msg }}</h1>
-
 		<ul class="words-list">
-			<li v-for="word in randomWords">
-				{{ splitWord(word) }} - 
-				{{ shuffleWord(splitWord(word)) }}<br>
-				<span class="hint">{{ splitHint(word) }}</span>
+			<li v-for="(obj, index) in randomWords" :class="{ active: ( index == 0) }">
+					<h1>{{ obj.shuffle }}</h1>
+					<div class="underscore">{{ obj.underscore }}</div>
+					<div class="hint">{{ obj.hint }}</div>
 			</li>
 		</ul>
+
+		<div class="buttons">
+			<button id="next-word">Next</button>
+		</div>
 
 	</div>
 </template>
@@ -22,7 +24,7 @@
 				words: [],
 				randomWords: [],
 				defaultMax: 20,
-				users: []
+				isActive: false
 			}
 		},
 		methods: {
@@ -34,7 +36,13 @@
 
 		    for (let i = 0; i < this.defaultMax; i++) {
 
-		    	newInput[i] = input[i]
+		    	let word = this.splitWord(input[i])
+		    	newInput[i] = {
+		    		word: word,
+		    		hint: this.splitHint(input[i]),
+		    		shuffle: this.shuffleWord(word),
+		    		underscore: this.getUnderScore(word)
+		    	}
 
 		    }
 
@@ -74,6 +82,16 @@
 
 				return phrase.split('|')[1]
 
+			},
+			getUnderScore(word) {
+
+				let underscore = ''
+
+				for (var i = word.length - 1; i >= 0; i--) {
+					underscore += ( i == 0 ) ? '_' : '_ '
+				}
+
+				return underscore
 			}
 		},
 		created() {
@@ -85,4 +103,25 @@
 	}
 </script>
 
-<style scoped></style>
+<style scoped>
+ul.words-list {
+	list-style: none;
+}
+
+ul.words-list li {
+	display: none;
+}
+
+ul.words-list li.active {
+	display: block;
+}
+
+ul.words-list li h2 {
+	letter-spacing: 0.2em
+}
+
+div.underscore {
+	font-size: 1.5em
+}
+
+</style>
