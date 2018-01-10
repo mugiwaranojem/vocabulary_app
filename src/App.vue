@@ -1,25 +1,21 @@
 <template>
   <div id="app">
-    <Timer/>
+
     <Vocabulary/>
-    {{ checkTime() }}
+
   </div>
 </template>
 
 <script>
-import Vocabulary from '@/components/Vocabulary' 
-import Timer from './components/Timer' 
+import Vocabulary from '@/components/Vocabulary'
 
 export default {
   name: 'app',
   components: {
-    Vocabulary,
-    Timer
+    Vocabulary
   },
   methods: {
-      checkTime() {
-        let myTimer =  Timer.data()
-      }
+
   }
 }
 </script>
