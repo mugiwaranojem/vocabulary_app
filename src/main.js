@@ -9,7 +9,6 @@ import VueJsonp from 'vue-jsonp'
 
 Vue.config.productionTip = false
 Vue.use(vueResource)
-Vue.use(VueJsonp)
 
 /* eslint-disable no-new */
 new Vue({
