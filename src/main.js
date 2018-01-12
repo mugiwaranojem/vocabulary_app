@@ -5,10 +5,23 @@ import App from './App'
 import router from './router'
 import words from './words'
 import vueResource from 'vue-resource'
-import VueJsonp from 'vue-jsonp'
+import firebase from 'firebase'
+import vuefire from 'vuefire'
+
+var config = {
+  apiKey: 'AIzaSyARAEjq5ieaC4pa7TXKdM8wKu-uWFx0pRU',
+  authDomain: 'test-api-43443.firebaseapp.com',
+  databaseURL: 'https://test-api-43443.firebaseio.com',
+  projectId: 'test-api-43443',
+  storageBucket: 'test-api-43443.appspot.com',
+  messagingSenderId: '747768745089'
+}
+
+Vue.prototype.$db = firebase.initializeApp(config).database()
 
 Vue.config.productionTip = false
 Vue.use(vueResource)
+Vue.use(vuefire)
 
 /* eslint-disable no-new */
 new Vue({

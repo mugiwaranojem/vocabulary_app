@@ -44,7 +44,7 @@
 				Each correct answer will be equal to 1 point,<br>get as many correct answer before time is out. 
 			</p>
 			<p>
-				To start type your name below and click OK<br>
+				To start, type your name below and click OK<br>
 				<input v-model="name" type="text" id="input-name" class="input-name" placeholder="Name here" @keyup.enter="start"/><br>
 				<button id="start" @click="start">OK</button>
 			</p>
@@ -73,6 +73,7 @@
 </template>
 
 <script>
+
 	export default {
 		name: 'Vocabulary',
 		data() {
@@ -292,9 +293,7 @@
 
 			start() {
 
-				let inputName = document.getElementById('input-name').value
-
-				if( inputName.length < 4 ) {
+				if( this.name.length < 4 ) {
 					alert('Name must be at least 4 characters')
 					return false
 				}
@@ -332,9 +331,8 @@
 
 			this.words = this.$words
 			this.randomWords = this.getRandomWords(this.words)
-
+			
 		},
-
 	}
 </script>
 

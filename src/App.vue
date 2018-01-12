@@ -1,6 +1,7 @@
 <template>
   <div id="app">
 
+    <ScoreBoard/>
     <Vocabulary/>
 
   </div>
@@ -8,11 +9,13 @@
 
 <script>
 import Vocabulary from '@/components/Vocabulary'
+import ScoreBoard from '@/components/ScoreBoard'
 
 export default {
   name: 'app',
   components: {
-    Vocabulary
+    Vocabulary,
+    ScoreBoard
   },
 }
 </script>
