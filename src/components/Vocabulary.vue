@@ -17,7 +17,7 @@
 				</div>
 			</div>
 			
-			<ul class="words-list">
+			<ul class="words-list" id="words-list">
 				<li v-for="(obj, index) in randomWords" :class="{ active: ( index == 0), word: 1 }" v-bind="{ 'data-i': index }">
 						<h1 class="shuffled-word">{{ obj.shuffle }}</h1>
 						<div class="underscore">
@@ -64,7 +64,7 @@
 				</tr>
 			</table>
 
-			<button id="restart">Play again!</button>
+			<button id="restart" @click="restart">Play again!</button>
 		</div>
 
 		<div class="transparent-bg" id="transparent-bg"></div>
@@ -81,7 +81,7 @@
 				msg: 'Vocabulary page',
 				words: [],
 				randomWords: [],
-				defaultMax: 5,
+				defaultMax: 100,
 				minutes: 10,
 				seconds: 59,
 				defaultSecVal: '00',
@@ -89,10 +89,90 @@
 				underscore: [],
 				points: 0,
 				name: '',
-				gameStatus: 'ongoing'
+				gameStatus: 'ongoing',
+				userKey: null,
+				users: [],
+				scoreBoardLimit: 10,
+				timeStart: null
 			}
 		},
 		methods: {
+
+			start() {
+
+				if( this.name.length < 4 ) {
+					alert('Name must be at least 4 characters')
+					return false
+				}
+
+				this.updateUserStatus()
+
+				this.timeStart = +new Date()
+
+				this.viewContainer('intro', 'intro', false)
+				this.viewContainer('transparent-bg', 'transparent-bg', false)
+				this.viewContainer('item-list', 'item-list', true)
+
+				document.onkeydown = this.onKeyHit
+				this.countDown()
+
+			},
+
+			finish() {
+
+				this.gameStatus = 'finish'
+				
+				if( this.points > 0 ) 
+					this.updateUser()
+
+				this.viewContainer('item-list', 'item-list', false)
+				document.getElementById('item-list').remove()
+
+				this.viewContainer('timesup', 'timesup', true)
+
+			},
+
+			restart() {
+				location.reload()
+			},
+
+			countDown() {
+
+				let countDownSec = this.seconds
+				let countDownMin = this.minutes - 1
+				let self = this
+
+				let timeInterval = setInterval(function(){
+
+					self.seconds = countDownSec
+					self.minutes = countDownMin
+
+					document.getElementById('minutes').innerHTML = ( self.minutes < 10 ) ? '0'+self.minutes : self.minutes
+					document.getElementById('seconds').innerHTML = ( self.seconds < 10 ) ? '0'+self.seconds : self.seconds
+
+					countDownSec--
+
+					if( self.minutes <= 0 && self.seconds <= 0) {
+						clearInterval(timeInterval)
+						self.finish()
+					} 
+
+					if( self.seconds == 0 ) {
+							countDownMin--
+							countDownSec = 59
+
+							if( document.getElementById('minutes').length )
+								document.getElementById('minutes').innerHTML = ( self.minutes < 10 ) ? '0'+self.minutes : self.minutes
+
+							// Update status every minute
+							// For users that didn't finish the game
+							self.updateUserStatus()
+					}
+
+				}, 1000)
+
+			},
+
 			getRandomWords( input ) {
 
 				input = this.swapArrs(input)
@@ -152,38 +232,6 @@
 
 			},
 
-			countDown() {
-
-				let countDownSec = this.seconds
-				let countDownMin = this.minutes - 1
-				let self = this
-
-				let timeInterval = setInterval(function(){
-
-					self.seconds = countDownSec
-					self.minutes = countDownMin
-
-					document.getElementById('minutes').innerHTML = ( self.minutes < 10 ) ? '0'+self.minutes : self.minutes
-					document.getElementById('seconds').innerHTML = ( self.seconds < 10 ) ? '0'+self.seconds : self.seconds
-
-					countDownSec--
-
-					if( self.minutes <= 0 && self.seconds <= 0) {
-						clearInterval(timeInterval)
-						self.finish()
-					} 
-
-					if( self.seconds == 0 ) {
-							countDownMin--
-							countDownSec = 59
-
-							document.getElementById('minutes').innerHTML = ( self.minutes < 10 ) ? '0'+self.minutes : self.minutes
-					}
-
-				}, 1000)
-
-			},
-
 			backSpace() {
 				let len = this.keyInputs.length
 
@@ -196,37 +244,35 @@
 				}
 			},
 
-			onKeyHit(e) {
+			reshaffleWord() {
 
-				if(!this.isAlpha(e)) return
-				if(e.keyCode == 8) { this.backSpace(); return }
-
-				let key = e.key
-				let activeItem  = document.getElementsByClassName('word active')[0]
+				let activeItem = document.getElementsByClassName('word active')[0]
 				let wordIndex = activeItem.getAttribute('data-i')
+				let shuffle = this.randomWords[wordIndex].shuffle
 				let currentItemChilds = activeItem.childNodes
 
 				currentItemChilds.forEach( element => {
-					if( element.tagName == 'DIV' && element.hasAttribute('class') && element.getAttribute('class') == 'underscore') {
-						this.underscore = element.childNodes
+
+					if( element.tagName == 'H1' && element.hasAttribute('class') && element.getAttribute('class') == 'shuffled-word') {
+						element.innerHTML = this.shuffleWord( shuffle )
 					}
 				})
 
-				if( this.keyInputs.length < this.underscore.length ) {
-					this.keyInputs.push(key)
+			},
+
+			nextWord() {
+
+				let activeItem = document.getElementsByClassName('word active')[0]
+				this.keyInputs = []
+
+				activeItem.setAttribute('class','word')
+
+				if( activeItem.nextElementSibling ) {
+					activeItem.nextElementSibling.setAttribute('class','word active')
+				} else {
+					document.getElementById('words-list').firstChild.setAttribute('class','word active')
 				}
 
-				if( this.keyInputs.length == this.underscore.length ) {
-					 if(this.checkAnswer()) {
-					 	this.points++
-					 	this.nextWord()
-					 	this.randomWords.splice(wordIndex, 1)
-					 	this.keyInputs = []
-					 	activeItem.remove()
-					 }
-				}
-
-				this.setUnderscoreVal()
 			},
 
 			setUnderscoreVal() {
@@ -256,20 +302,45 @@
 			
 			},
 
-			reshaffleWord() {
+			onKeyHit(e) {
 
-				let activeItem = document.getElementsByClassName('word active')[0]
+				if(!this.isAlpha(e)) return
+				if(e.keyCode == 8) { this.backSpace(); return }
+
+				let key = e.key
+				let activeItem  = document.getElementsByClassName('word active')[0]
 				let wordIndex = activeItem.getAttribute('data-i')
-				let shuffle = this.randomWords[wordIndex].shuffle
 				let currentItemChilds = activeItem.childNodes
 
 				currentItemChilds.forEach( element => {
-
-					if( element.tagName == 'H1' && element.hasAttribute('class') && element.getAttribute('class') == 'shuffled-word') {
-						element.innerHTML = this.shuffleWord( shuffle )
+					if( element.tagName == 'DIV' && element.hasAttribute('class') && element.getAttribute('class') == 'underscore') {
+						this.underscore = element.childNodes
 					}
 				})
 
+				if( this.keyInputs.length < this.underscore.length ) {
+					this.keyInputs.push(key)
+				}
+
+				if( this.keyInputs.length == this.underscore.length ) {
+					 if(this.checkAnswer()) {
+					 	this.points++
+					 	this.nextWord()
+					 	this.randomWords.splice(wordIndex, 1)
+					 	this.keyInputs = []
+					 	activeItem.remove()
+
+					 	if( this.userKey == null ) {
+					 		let dbUserKey = this.$db.ref('users').push().key
+							this.userKey = dbUserKey
+					 	}
+
+					 	this.updateUser()
+					 		
+					 }
+				}
+
+				this.setUnderscoreVal()
 			},
 
 			isAlpha(e) {
@@ -280,39 +351,57 @@
 				return false
 			},
 
-			nextWord() {
+			updateUserStatus() {
 
-				let activeItem = document.getElementsByClassName('word active')[0]
+				this.users.forEach(user => {
 
-				activeItem.setAttribute('class','word')
-				activeItem.nextElementSibling.setAttribute('class','word active')
+					if( user.status == 'finish' ) return
 
-				this.keyInputs = []
+					let minute = ((+new Date()) - user.timestart) / 1000 / 60
+
+					if( minute >= 12 ) {
+						this.$db.ref('users/' + user['.key']).set({
+							name: user.name,
+							timestart: user.timestart,
+							score: user.score,
+							status: 'finish'
+						})
+					}
+
+
+				})
 
 			},
 
-			start() {
+			addUserToScoreBoard() {
 
-				if( this.name.length < 4 ) {
-					alert('Name must be at least 4 characters')
-					return false
+				let userKey = this.$db.ref('users').push().key
+
+				if( this.users.length >= this.scoreBoardLimit ) {
+
+					// Get the lowest score and remove
+					let firstUserKey = this.users[0]['.key']
+					this.$db.ref('users/'+userKey).remove()
+
 				}
 
-				this.viewContainer('intro', 'intro', false)
-				this.viewContainer('transparent-bg', 'transparent-bg', false)
-				this.viewContainer('item-list', 'item-list', true)
+				let userData = {
+					name: this.name,
+					score: this.points,
+					timestart: this.timeStart
+				}
 
-				document.onkeydown = this.onKeyHit
-				this.countDown()
+				return this.$db.ref('users/'+userKey).set(userData)
 
 			},
 
-			finish() {
+			updateUser() {
 
-				this.gameStatus = 'finish'
-
-				this.viewContainer('item-list', 'item-list', false)
-				this.viewContainer('timesup', 'timesup', true)
+				return this.$db.ref('users/' + this.userKey).set({
+					name: this.name,
+					score: this.points,
+					status: this.gameStatus
+				})
 
 			},
 
@@ -333,6 +422,11 @@
 			this.randomWords = this.getRandomWords(this.words)
 			
 		},
+		mounted() {
+				let userRef = this.$db.ref('users')
+				this.$bindAsArray('users', userRef.orderByChild('score'))
+		},
+
 	}
 </script>
 
@@ -354,8 +448,7 @@ div.transparent-bg {
 	top: 0;
 	right: 0;
 	left: 0;
-	background-color: #000;
-	opacity: 0.5;
+	background-color: #ddd;
 	z-index: 1040;
 	width: 100%;
 	height: 100%;
