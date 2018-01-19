@@ -368,7 +368,6 @@
 						})
 					}
 
-
 				})
 
 			},
@@ -400,7 +399,8 @@
 				return this.$db.ref('users/' + this.userKey).set({
 					name: this.name,
 					score: this.points,
-					status: this.gameStatus
+					status: this.gameStatus,
+					timestart: this.timeStart
 				})
 
 			},
