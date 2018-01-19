@@ -161,7 +161,7 @@
 							countDownMin--
 							countDownSec = 59
 
-							if( document.getElementById('minutes').length )
+							if( document.getElementById('minutes') )
 								document.getElementById('minutes').innerHTML = ( self.minutes < 10 ) ? '0'+self.minutes : self.minutes
 
 							// Update status every minute
